@@ -133,7 +133,7 @@ The desktop is an app of its own, Desktop (`suite-desktop`), sharing Explorer's 
 | Our own Dock (Bar): pinned apps (reordered by dragging), running apps, Downloads stack, Trash | F | done | Starts with the system Dock's apps; drop files on an app to open them, on the Trash to trash them. |
 | Dock: hiding automatically, windows kept above it, minimized windows in it | F | done | Other apps' windows need the Accessibility permission; minimized windows show as a window with their app's icon (a picture of them would need Screen Recording). |
 | Dock magnification, folders and files kept in the Dock, recent apps, other screens | F | to do | |
-| Shortcuts / AppleScript actions | F | to do | |
+| Shortcuts / AppleScript actions | F | partial | A Bindings shortcut can run a Shortcuts shortcut or a shell command (osascript). |
 | English and French | — | to do | Xcode string catalogs. |
 | Finder's sounds (Trash, Empty Trash, Dock) | F | done | When user interface sound effects are on. |
 | Automatic updates | — | done | Signed releases on GitHub (or another web address), installed by Explorer itself. |
@@ -157,6 +157,25 @@ The desktop is an app of its own, Desktop (`suite-desktop`), sharing Explorer's 
 | Backup of the history to iCloud Drive | done | Off by default, one backup per Mac; brought back into an empty history (a reinstall, a new Mac). |
 | Sync across devices | blocked | Windows syncs through a Microsoft account; Universal Clipboard only shares the latest item, which Clipboard keeps like any copy. |
 | Emoji, GIF and symbol tabs in the panel | to do | Emoji & Symbols (Ctrl+Cmd+Space) meanwhile. |
+
+## Keyboard shortcuts of one's own (Bindings, after Karabiner-Elements)
+
+Neither Finder nor Windows has this built in (Windows has PowerToys' Keyboard Manager). Bindings is an app of
+its own (`suite-bindings`), its tab in Suite Settings (`suite-settings`); Explorer starts it and tells it
+where the keyboard is.
+
+| Feature | Status | Notes |
+| --- | --- | --- |
+| Bindings, an app of its own with no window, started by Explorer; rules edited in Suite Settings' Bindings tab | done | Accessibility access needed for its event tap; without it no key is touched. |
+| Three levels: everywhere (except some apps), in given apps, in a context; the most specific wins | done | Context: keyboard focus in a text field or not, Explorer's desktop, folder windows or other windows, a window title, optionally in given apps. |
+| Actions: press another shortcut (held and repeated), open an app, open a folder in Explorer, run a Shortcuts shortcut, run a shell command, choose a menu item of the app in front, turn a shortcut off | done | Menu items through Accessibility, by their titles. |
+| Recording a shortcut by pressing it, on/off per rule, order within a level | done | Bindings is paused while Settings record, so taken shortcuts can be recorded again. |
+| Warnings: two rules on the same chord, macOS' own shortcuts as set on this Mac, most apps' menu shortcuts, Clipboard's hold ⌘V, keys that type text | done | System shortcuts read from `com.apple.symbolichotkeys`, read-only. |
+| Every app's menu shortcuts listed (read through Accessibility as apps are used), turned off or given another chord per app, menu items without one given one | done | Like System Settings' App Shortcuts, but at once and for every app. |
+| macOS' own shortcuts listed | partial | Read-only, with a button to System Settings: turning them off or changing them from here needs private APIs. |
+| Rules in a JSON file that can be edited by hand (`bindings.json`), picked up as soon as it is saved | done | |
+| Modifier keys alone (Caps Lock to Escape, a tap of ⌘), one key acting as a modifier, key sequences, mouse buttons | to do | Karabiner works below the event tap level (a driver), which Bindings doesn't install; one-key swaps such as Caps Lock to Escape could use macOS' own `hidutil` key mapping. |
+| Per-device rules (one keyboard, not another) | to do | |
 
 ## Picture viewer (in place of Preview for pictures)
 

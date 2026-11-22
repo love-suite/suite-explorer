@@ -50,6 +50,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         }
         FileActions.eraseNeedingRoot = { PrivilegedEraser.erase($0) }
         ClipboardCompanion.start()
+        BindingsCompanion.start()
         FileUndo.recordTrashingInOtherApps()
         SettingsApp.startListening()
         NSWorkspace.shared.notificationCenter.addObserver(forName: NSWorkspace.willPowerOffNotification, object: nil,

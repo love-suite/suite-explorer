@@ -30,7 +30,8 @@ ExplorerUI       (library, AppKit)
     menu bar, Suite Trash's client (`PrivilegedEraser`)
 Explorer         (the app: Explorer.app)
     Finder handling, app delegate, menu bar extra, updates, Clipboard's settings button
-    (`ClipboardCompanion`), Explorer's side of the link with Suite Settings (`SettingsApp`)
+    (`ClipboardCompanion`), starting Bindings and telling it where the keyboard is (`BindingsCompanion`),
+    Explorer's side of the link with Suite Settings (`SettingsApp`)
 TrashCore, Trash (Suite Trash, inside Explorer.app) the root daemon that erases, for Explorer alone,
     Trash items needing root
 ```
@@ -47,10 +48,10 @@ images, Finder's sounds, handing pictures and PDFs to Viewer (`ViewerHandoff`).
 puts Finder's desktop back should Desktop vanish, is installed from `suite-guard`.
 
 `SuiteCore` (repository `suite-core`) brings what Explorer shares with every app: where its settings
-live (`SuiteDefaults`), the messages between the apps (`ExplorerLink`, `ClipboardMessage`), what Explorer
-knows of Viewer, Clipboard and Bar (`SuiteApps`), settings profiles, the updater and its feed. Explorer
-never imports another app's code: it opens Viewer, Clipboard and Suite Settings by bundle id and talks to
-them through distributed notifications.
+live (`SuiteDefaults`), the messages between the apps (`ExplorerLink`, `ClipboardMessage`,
+`BindingsMessage`), what Explorer knows of Viewer, Clipboard, Bar and Bindings (`SuiteApps`), settings
+profiles, the updater and its feed. Explorer never imports another app's code: it opens Viewer, Clipboard,
+Bindings and Suite Settings by bundle id and talks to them through distributed notifications.
 
 Keep file logic in the core libraries (`SuiteFilesCore` when another app needs it) and tested; keep the AppKit layers thin.
 
@@ -106,6 +107,13 @@ Keep file logic in the core libraries (`SuiteFilesCore` when another app needs i
   `Bar`), which starts by itself at login while turned on, as Clipboard does; Explorer starts neither.
   `--restore-finder` asks it to put the system Dock back (`--restore-bar`, `BarCompanion`). The Dock
   follows Explorer's Explorer/Finder switch, read from Explorer's defaults; quitting Explorer leaves it be.
+- **Bindings**: keyboard shortcuts of the user's own, an app of its own (repository `suite-bindings`,
+  `local.suite.bindings`, on its `feat/bindings` branch), edited in Suite Settings › Bindings. Explorer
+  starts it at launch unless it is turned off (`BindingsCompanion`, `BindingsApp.isEnabled`) and tells it
+  where the keyboard is in Explorer on every key window change (`ExplorerContext`: folder window, other
+  window; `BindingsMessage.explorerContextDidChange`), and again when Bindings asks
+  (`requestExplorerContext`). The desktop is Desktop.app's now: Explorer no longer knows when it has the
+  keyboard.
 - **Explorer windows**: laid out like Finder's: the sidebar the whole height on the left, Finder's in
   content and look (asked on 2026-11-22): Recents (files opened in the last 30 days, Spotlight) and
   Shared (what is shared in iCloud Drive), then Favorites (the pinned folders, `QuickAccessStore`; Finder's
