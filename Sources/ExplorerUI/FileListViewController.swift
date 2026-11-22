@@ -703,6 +703,12 @@ final class FileListViewController: NSViewController, FileCommandHandling {
         QuickLook.toggle()
     }
 
+    /// File › Eject: the selected disks (This Mac lists them).
+    @objc func ejectSelection(_ sender: Any?) {
+        guard let volumes = FileActions.ejectableVolumes(selectedURLs) else { return NSSound.beep() }
+        FileActions.eject(volumes)
+    }
+
     // MARK: Opening
 
     @objc private func outlineDoubleClicked() {
@@ -717,7 +723,8 @@ final class FileListViewController: NSViewController, FileCommandHandling {
 
 extension FileListViewController: NSMenuItemValidation {
     func validateMenuItem(_ item: NSMenuItem) -> Bool {
-        validateFileCommand(item) ?? true
+        if item.action == #selector(ejectSelection(_:)) { return FileActions.ejectableVolumes(selectedURLs) != nil }
+        return validateFileCommand(item) ?? true
     }
 }
 
@@ -749,6 +756,10 @@ extension FileListViewController: NSMenuDelegate {
         add(UIL("Open")) { [weak self] in targets.forEach { self?.open($0) } }
         if let first = targets.first, !first.isFolder {
             menu.addItem(openWithItem(for: first.url, all: urls))
+        }
+        if let volumes = FileActions.ejectableVolumes(urls) {
+            add(targets.count == 1 ? String(format: UIL("Eject \u{201C}%@\u{201D}"), targets[0].name)
+                                   : UIL("Eject")) { FileActions.eject(volumes) }
         }
         menu.addItem(.separator())
         add(UIL("Cut")) { FileClipboard.cut(urls) }

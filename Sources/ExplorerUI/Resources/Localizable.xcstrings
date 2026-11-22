@@ -1220,6 +1220,126 @@
           }
         }
       }
+    },
+    "Eject": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Éjecter"
+          }
+        }
+      }
+    },
+    "Eject “%@”": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Éjecter « %@ »"
+          }
+        }
+      }
+    },
+    "The disk “%@” couldn't be ejected.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le disque « %@ » n'a pas pu être éjecté."
+          }
+        }
+      }
+    },
+    "Connect to Server": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Se connecter au serveur"
+          }
+        }
+      }
+    },
+    "Server Address:": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Adresse du serveur :"
+          }
+        }
+      }
+    },
+    "Recent Servers": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Serveurs récents"
+          }
+        }
+      }
+    },
+    "No Recent Servers": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucun serveur récent"
+          }
+        }
+      }
+    },
+    "Clear Recent Servers": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Effacer les serveurs récents"
+          }
+        }
+      }
+    },
+    "Connect": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Se connecter"
+          }
+        }
+      }
+    },
+    "“%@” isn't a server address.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "« %@ » n'est pas une adresse de serveur."
+          }
+        }
+      }
+    },
+    "Type an address such as smb://server/share.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tapez une adresse comme smb://serveur/partage."
+          }
+        }
+      }
+    },
+    "Couldn't connect to “%@”.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossible de se connecter à « %@ »."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

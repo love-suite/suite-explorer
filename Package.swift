@@ -39,7 +39,8 @@ let package = Package(
             name: "ExplorerUI",
             dependencies: ["ExplorerCore", "ExplorerSettings", suiteCore, filesCore, filesUI],
             resources: [.process("Resources")],
-            linkerSettings: [.linkedFramework("Quartz"), .linkedFramework("ServiceManagement")]
+            linkerSettings: [.linkedFramework("Quartz"), .linkedFramework("ServiceManagement"),
+                             .linkedFramework("NetFS")]
         ),
         // The app: desktop, Explorer windows, default folder viewer and Finder redirect.
         .executableTarget(

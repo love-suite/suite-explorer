@@ -44,6 +44,7 @@ final class FolderPane: NSViewController {
 
     /// What Recents, Shared or this Mac holds, on its way.
     private var placeContents: PlaceContents?
+    private var volumeObservers: [NSObjectProtocol] = []
     /// The search typed in the window's toolbar, shown here in place of the folder's contents.
     private var search: FolderSearch?
     private(set) var searchText = ""
@@ -153,7 +154,25 @@ final class FolderPane: NSViewController {
             self?.navigate(to: url)
         }
         addressBar.onSubmit = { [weak self] text in self?.submitAddress(text) ?? false }
+        volumeObservers = VolumeMonitor.observe { [weak self] change, volume in
+            self?.volumesChanged(change, volume)
+        }
         show()
+    }
+
+    deinit {
+        VolumeMonitor.stopObserving(volumeObservers)
+    }
+
+    /// This Mac lists the disks as they come and go; a folder on a disk just ejected gives way to This Mac,
+    /// as Finder closes its windows.
+    private func volumesChanged(_ change: VolumeMonitor.Change, _ volume: URL) {
+        if VirtualPlace(url: url) == .computer {
+            showContents(options: FolderViewStore.shared.options(for: url))
+        } else if change == .unmounted, url.isFileURL, volume.standardizedFileURL.path != "/",
+                  VolumeInfo.path(url.standardizedFileURL.path, isOn: volume.standardizedFileURL.path) {
+            navigate(to: VirtualPlace.computer.url)
+        }
     }
 
     /// In shades of grey while the window isn't in front.

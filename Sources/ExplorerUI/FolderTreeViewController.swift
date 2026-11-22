@@ -20,6 +20,8 @@ final class SidebarRow {
     var isFavorite = false
     /// A disk: it doesn't drag out.
     var isVolume = false
+    /// A disk that can be ejected: an eject button after its name, as in Finder.
+    var canEject = false
 
     init(heading name: String, children: [SidebarRow]) {
         kind = .heading
@@ -68,6 +70,7 @@ final class FolderTreeViewController: NSViewController, NSOutlineViewDataSource,
     private var draggingPaths: Set<String> = []
     private let hoverLabel = HoverLabel()
     private var windowObservers: [NSObjectProtocol] = []
+    private var volumeObservers: [NSObjectProtocol] = []
     private static let cellID = NSUserInterfaceItemIdentifier("SidebarCell")
     private static let iconCellID = NSUserInterfaceItemIdentifier("SidebarIconCell")
 
@@ -121,12 +124,8 @@ final class FolderTreeViewController: NSViewController, NSOutlineViewDataSource,
             self.places = WindowSettings.sidebarPlaces
             self.rebuild()
         }
-        // Disks come and go.
-        let workspace = NSWorkspace.shared.notificationCenter
-        for name in [NSWorkspace.didMountNotification, NSWorkspace.didUnmountNotification,
-                     NSWorkspace.didRenameVolumeNotification] {
-            workspace.addObserver(forName: name, object: nil, queue: .main) { [weak self] _ in self?.rebuild() }
-        }
+        // Disks come and go, live.
+        volumeObservers = VolumeMonitor.observe { [weak self] _, _ in self?.rebuild() }
         center.addObserver(forName: NSView.boundsDidChangeNotification,
                            object: (view as? NSScrollView)?.contentView, queue: .main) { [weak self] _ in
             self?.hoverLabel.hide()
@@ -139,6 +138,10 @@ final class FolderTreeViewController: NSViewController, NSOutlineViewDataSource,
         windowObservers.forEach(NotificationCenter.default.removeObserver)
         windowObservers = view.window?.observeActivity { [weak self] in self?.updateTint() } ?? []
         updateTint()
+    }
+
+    deinit {
+        VolumeMonitor.stopObserving(volumeObservers)
     }
 
     override func viewWillDisappear() {
@@ -221,18 +224,16 @@ final class FolderTreeViewController: NSViewController, NSOutlineViewDataSource,
     }
 
     private static func volumes() -> [SidebarRow] {
-        let keys: [URLResourceKey] = [.volumeLocalizedNameKey, .volumeIsInternalKey, .volumeIsLocalKey]
-        let urls = FileManager.default.mountedVolumeURLs(includingResourceValuesForKeys: keys,
-                                                         options: [.skipHiddenVolumes]) ?? []
-        return urls.map { url in
-            let values = try? url.resourceValues(forKeys: Set(keys))
-            let glyph: SidebarGlyph = values?.volumeIsLocal == false
-                ? .symbol("externaldrive.connected.to.line.below")
-                : values?.volumeIsInternal == true ? .symbol("internaldrive")
-                : .symbol("externaldrive")
-            let row = SidebarRow(.folder, url: url, name: values?.volumeLocalizedName ?? url.lastPathComponent,
-                                 glyph: glyph)
+        VolumeInfo.mounted().map { volume in
+            let glyph: SidebarGlyph
+            switch volume.kind {
+            case .network: glyph = .symbol("externaldrive.connected.to.line.below")
+            case .internalDisk: glyph = .symbol("internaldrive")
+            case .externalDisk: glyph = .symbol("externaldrive")
+            }
+            let row = SidebarRow(.folder, url: volume.url, name: volume.name, glyph: glyph)
             row.isVolume = true
+            row.canEject = volume.canEject
             return row
         }
     }
@@ -356,6 +357,8 @@ final class FolderTreeViewController: NSViewController, NSOutlineViewDataSource,
         let cell = outlineView.makeView(withIdentifier: identifier, owner: self) as? SidebarCell
             ?? SidebarCell(identifier: identifier, iconOnly: iconsOnly)
         cell.show(row, active: isActive)
+        let volume = row.url
+        cell.onEject = row.canEject ? { FileActions.eject([volume]) } : nil
         return cell
     }
 
@@ -511,6 +514,11 @@ final class FolderTreeViewController: NSViewController, NSOutlineViewDataSource,
             add(UIL("Remove from Favorites")) { QuickAccessStore.shared.unpin(url) }
             menu.addItem(.separator())
         }
+        if let row = outline.item(atRow: outline.clickedRow) as? SidebarRow, row.canEject {
+            let url = row.url
+            add(String(format: UIL("Eject \u{201C}%@\u{201D}"), row.name)) { FileActions.eject([url]) }
+            menu.addItem(.separator())
+        }
         let current = isRightSide ? WindowSettings.rightSidebar : WindowSettings.leftSidebar
         let right = isRightSide
         func choose(_ style: WindowSettings.SidebarStyle) {
@@ -524,11 +532,17 @@ final class FolderTreeViewController: NSViewController, NSOutlineViewDataSource,
 }
 
 /// A sidebar row as Finder draws it: a monochrome glyph in the accent colour (grey while the window isn't
-/// in front), the name, and a cloud for folders kept in iCloud. Icons only, the glyph alone.
+/// in front), the name, a cloud for folders kept in iCloud and an eject button for disks that can be
+/// ejected. Icons only, the glyph alone (disks are ejected from the right-click menu).
 private final class SidebarCell: NSTableCellView {
     private let icon = NSImageView()
     private let name = NSTextField(labelWithString: "")
     private let cloud = NSImageView()
+    private let ejectButton = NSButton()
+    /// Set for a disk that can be ejected; the button shows only then.
+    var onEject: (() -> Void)? {
+        didSet { ejectButton.isHidden = onEject == nil }
+    }
 
     init(identifier: NSUserInterfaceItemIdentifier, iconOnly: Bool) {
         super.init(frame: .zero)
@@ -556,7 +570,21 @@ private final class SidebarCell: NSTableCellView {
         cloud.contentTintColor = .tertiaryLabelColor
         cloud.translatesAutoresizingMaskIntoConstraints = false
         addSubview(cloud)
+        ejectButton.image = NSImage(systemSymbolName: "eject.fill", accessibilityDescription: UIL("Eject"))?
+            .withSymbolConfiguration(.init(pointSize: 11, weight: .regular))
+        ejectButton.isBordered = false
+        ejectButton.contentTintColor = .secondaryLabelColor
+        ejectButton.toolTip = UIL("Eject")
+        ejectButton.target = self
+        ejectButton.action = #selector(ejectClicked)
+        ejectButton.isHidden = true
+        ejectButton.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(ejectButton)
         NSLayoutConstraint.activate([
+            ejectButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -6),
+            ejectButton.centerYAnchor.constraint(equalTo: centerYAnchor),
+            ejectButton.widthAnchor.constraint(equalToConstant: 16),
+            ejectButton.leadingAnchor.constraint(greaterThanOrEqualTo: name.trailingAnchor, constant: 4),
             icon.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 2),
             icon.centerYAnchor.constraint(equalTo: centerYAnchor),
             icon.widthAnchor.constraint(equalToConstant: 20),
@@ -570,6 +598,10 @@ private final class SidebarCell: NSTableCellView {
     }
 
     required init?(coder: NSCoder) { fatalError("not used") }
+
+    @objc private func ejectClicked() {
+        onEject?()
+    }
 
     func show(_ row: SidebarRow, active: Bool) {
         icon.image = row.glyph.image

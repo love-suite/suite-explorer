@@ -113,8 +113,11 @@ The desktop is an app of its own, Desktop (`suite-desktop`), sharing Explorer's 
 
 | Feature | From | Status | Notes |
 | --- | --- | --- | --- |
-| Eject disks | F+W | to do | |
-| Connect to Server (Cmd+K), network shares | F+W | to do | |
+| Eject disks | F+W | done | Eject button after the disk's name in the sidebar (Finder's), Eject “name” in its right-click menu and in This Mac's, File › Eject (Cmd+E). Removable and external disks, disk images, network shares; never the startup disk (`VolumeInfo.canEject`). |
+| Disks listed live as they are mounted, ejected or renamed | F+W | done | The sidebar and This Mac follow; a window showing a folder on a disk just ejected goes to This Mac (`VolumeMonitor`). |
+| Connect to Server (Cmd+K), network shares | F+W | done | Go › Connect to Server: an address (smb, afp, nfs, WebDAV, ftp; `server/share` means SMB, Windows' `\\server\share` accepted; `ServerAddress`), the ten recent servers (`RecentServers`); mounted by NetFS, which asks for a name and password, then shown in an Explorer window; vnc opens Screen Sharing. No Browse button nor server favourites yet. |
+| Disk images (.dmg, .iso) open as disks | F+W | done | Mounted (`hdiutil attach`) and shown in an Explorer window, as Windows does with an ISO; images needing a password or a licence go to the system's DiskImageMounter, which asks (`DiskImage`). |
+| Installer packages (.pkg, .mpkg) | F+W | done | Open in the system's Installer (their default app), as before. |
 | iCloud Drive sync state | F+W | done | Badge on icons: cloud, check, arrows, warning. |
 | Download now / Remove download (Keep on this Mac, Free up space) | F+W | to do | Public file APIs allow it. |
 | Sync state of cloud storage apps (Dropbox, OneDrive and others on File Provider) | F | done | Same badges, from the same public file properties. |

@@ -38,6 +38,7 @@ public enum AppMenu {
         add(file, UIL("Change Icon"), Selector(("changeIcon:")))
         add(file, UIL("Rename"), Selector(("renameSelection:")))
         add(file, UIL("Quick Look"), Selector(("toggleQuickLook:")), "y")
+        add(file, UIL("Eject"), Selector(("ejectSelection:")), "e")
         file.addItem(.separator())
         add(file, UIL("Move to Trash"), Selector(("moveToTrash:")), "\u{8}")
         add(file, UIL("Put Back"), #selector(ExplorerWindowController.putBack(_:)))
@@ -104,6 +105,7 @@ public enum AppMenu {
         go.addItem(.separator())
         add(go, UIL("Trash"), #selector(Actions.goToPlace(_:)), target: Actions.shared).representedObject = TrashFolder.url
         add(go, UIL("Go to Folder"), #selector(ExplorerWindowController.focusAddressBar(_:)), "g", shiftCmd)
+        add(go, UIL("Connect to Server"), #selector(Actions.connectToServer), "k", target: Actions.shared)
 
         let window = submenu(UIL("Window"), in: main)
         add(window, UIL("Minimize"), #selector(NSWindow.performMiniaturize(_:)), "m")
@@ -229,6 +231,10 @@ public enum AppMenu {
         /// Finder's Cmd+Shift+.: hidden files everywhere, the desktop included.
         @objc func toggleHiddenFiles() {
             DisplaySettings.showsHiddenFiles.toggle()
+        }
+
+        @objc func connectToServer() {
+            ConnectToServerPanel.show()
         }
 
         @objc func toggleExtensions() {
