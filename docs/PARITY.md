@@ -132,7 +132,13 @@ The desktop is an app of its own, Desktop (`suite-desktop`), sharing Explorer's 
 | Finder's Dock icon | F | done | Via our own Dock, Bar (`suite-bar`, Settings › Bar): Explorer in Finder's place, and the system Dock hidden with its public settings (put back on choosing the System Dock or Finder). |
 | Our own Dock (Bar): pinned apps (reordered by dragging), running apps, Downloads stack, Trash | F | done | Starts with the system Dock's apps; drop files on an app to open them, on the Trash to trash them. |
 | Dock: hiding automatically, windows kept above it, minimized windows in it | F | done | Other apps' windows need the Accessibility permission; minimized windows show as a window with their app's icon (a picture of them would need Screen Recording). |
-| Dock magnification, folders and files kept in the Dock, recent apps, other screens | F | to do | |
+| Dock: folders and files kept in it (Downloads by default), added by dropping, reordered, removed | F | done | Taken from the system Dock's `persistent-others` with their options. |
+| Dock folders: Display as Folder/Stack, View as Fan/Grid/List/Automatic, Sort by Name/Dates/Kind | F | done | The grid opens subfolders inside it; the list has submenus; items drag out. |
+| Dock: recent apps, indicators, launch bounce, minimize into application icon | F | done | Options start from the system Dock's. |
+| Dock: app menu with its windows, Options, Hide/Hide Others, Quit/Force Quit; ⌘-click, ⌥-click | F | done | Windows of other apps need Accessibility. Open at Login goes through System Events (Automation permission). "Assign To" (Desktops) and apps' own Dock menus aren't offered: no public API. |
+| Dock: badges (unread counts) | F | done | Read from the hidden system Dock through Accessibility. Bouncing for attention isn't shown: no public API. |
+| Dock: resize by dragging the separator, separator menu, eject disks on the Trash | F | done | |
+| Dock magnification, position on screen (left, right), other screens, Show All Windows | F | done | Show All Windows posts the App Exposé shortcut (Accessibility) or opens Mission Control on the app. Icons shrink to fit the edge. |
 | Shortcuts / AppleScript actions | F | to do | |
 | English and French | — | to do | Xcode string catalogs. |
 | Finder's sounds (Trash, Empty Trash, Dock) | F | done | When user interface sound effects are on. |
